@@ -11,7 +11,7 @@ from datetime import datetime
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Image,
-    HRFlowable, Table, TableStyle
+    HRFlowable, Table, TableStyle, PageBreak
 )
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch, cm
@@ -22,11 +22,12 @@ from reportlab.lib.utils import ImageReader
 
 # ── Rutas de assets ────────────────────────────────────────────────────────────
 BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
-LOGO_PATH   = os.path.join(BASE_DIR, "logo_gia.png")
-PATRON_PATH = os.path.join(BASE_DIR, "patron_dorado.png")
-FOTO1_PATH  = os.path.join(BASE_DIR, "foto_gia_1.png")
-FOTO2_PATH  = os.path.join(BASE_DIR, "foto_gia_2.jpeg")
-FOTO3_PATH  = os.path.join(BASE_DIR, "foto_gia_3.png")
+LOGO_PATH    = os.path.join(BASE_DIR, "logo_gia.png")
+PATRON_PATH  = os.path.join(BASE_DIR, "patron_dorado.png")
+BARRERA_PATH = os.path.join(BASE_DIR, "barrera.png")
+FOTO1_PATH   = os.path.join(BASE_DIR, "foto_gia_1.png")
+FOTO2_PATH   = os.path.join(BASE_DIR, "foto_gia_2.jpeg")
+FOTO3_PATH   = os.path.join(BASE_DIR, "foto_gia_3.png")
 
 # ── Colores GIA ────────────────────────────────────────────────────────────────
 NAVY   = colors.HexColor("#3D4A6B")
@@ -128,36 +129,36 @@ TEXTOS = {
 
 # ── Header/Footer en cada página ──────────────────────────────────────────────
 PAGE_W, PAGE_H = letter
-MARGIN_X  = 1.1 * inch
-LOGO_H    = 1.0 * inch   # altura del logo en header
-LOGO_W    = 2.0 * inch
-PATRON_H  = 0.42 * inch  # altura del patrón en footer
-TOP_MARGIN    = LOGO_H + 0.3 * inch   # espacio reservado para header
-BOTTOM_MARGIN = PATRON_H + 0.25 * inch  # espacio reservado para footer
+MARGIN_X      = 1.1 * inch
+LOGO_H        = 1.05 * inch
+LOGO_W        = 2.1  * inch
+BARRERA_H     = 0.48 * inch
+TOP_MARGIN    = LOGO_H + 0.55 * inch   # margen generoso para elegancia
+BOTTOM_MARGIN = BARRERA_H + 0.3 * inch
 
 def _dibujar_pagina(c, doc):
-    """Dibuja logo (header) y patrón (footer) en cada página."""
+    """Dibuja logo (header) y barrera (footer) en cada página."""
     c.saveState()
 
-    # ── HEADER: logo GIA centrado ──────────────────────────────────────────
+    # ── HEADER: logo GIA centrado con margen superior generoso ────────────
     if os.path.exists(LOGO_PATH):
         logo_img = ImageReader(LOGO_PATH)
         x = (PAGE_W - LOGO_W) / 2
-        y = PAGE_H - LOGO_H - 0.18 * inch
+        y = PAGE_H - LOGO_H - 0.38 * inch   # margen superior amplio
         c.drawImage(logo_img, x, y, width=LOGO_W, height=LOGO_H,
                     preserveAspectRatio=True, mask="auto")
 
     # línea dorada bajo el logo
-    lx = MARGIN_X
-    ly = PAGE_H - LOGO_H - 0.22 * inch
+    ly = PAGE_H - LOGO_H - 0.42 * inch
     c.setStrokeColor(GOLD)
     c.setLineWidth(0.9)
-    c.line(lx, ly, PAGE_W - MARGIN_X, ly)
+    c.line(MARGIN_X, ly, PAGE_W - MARGIN_X, ly)
 
-    # ── FOOTER: patrón dorado a ancho completo ─────────────────────────────
-    if os.path.exists(PATRON_PATH):
-        patron_img = ImageReader(PATRON_PATH)
-        c.drawImage(patron_img, 0, 0, width=PAGE_W, height=PATRON_H,
+    # ── FOOTER: barrera.png a ancho completo ──────────────────────────────
+    footer_path = BARRERA_PATH if os.path.exists(BARRERA_PATH) else PATRON_PATH
+    if os.path.exists(footer_path):
+        barrera_img = ImageReader(footer_path)
+        c.drawImage(barrera_img, 0, 0, width=PAGE_W, height=BARRERA_H,
                     preserveAspectRatio=False, mask="auto")
 
     c.restoreState()
@@ -210,23 +211,23 @@ def generar_pdf(nombre: str, tipo: str, fecha: str, cantidad: int, es_rural: boo
         f"PROPUESTA GIA GELATERIA: {texto['titulo_tipo']} — {fecha.upper()}",
         s_titulo
     ))
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 6))
 
     # ── Saludo ─────────────────────────────────────────────────────────────────
     story.append(Paragraph(f"Estimado/a <b>{nombre}</b>,", s_body))
-    story.append(Spacer(1, 4))
+    story.append(Spacer(1, 3))
     story.append(Paragraph(
         "Gracias por pensar en GIA Gelateria para acompañarlos en un día tan especial.",
         s_body
     ))
-    story.append(Spacer(1, 4))
+    story.append(Spacer(1, 3))
     story.append(Paragraph(texto["intro"], s_body))
-    story.append(Spacer(1, 10))
+    story.append(Spacer(1, 7))
 
     # ── Sección propuesta ──────────────────────────────────────────────────────
     story.append(Paragraph(texto["subtitulo"], s_seccion))
     story.append(Paragraph(texto["descripcion"], s_body))
-    story.append(Spacer(1, 6))
+    story.append(Spacer(1, 4))
 
     # ── Incluye ────────────────────────────────────────────────────────────────
     story.append(Paragraph("Incluye:", s_seccion))
@@ -234,7 +235,7 @@ def generar_pdf(nombre: str, tipo: str, fecha: str, cantidad: int, es_rural: boo
     transporte_txt = (
         "Transporte ida y regreso (zona rural — fuera de Cartagena)"
         if es_rural else
-        "Transporte ida y regreso dentro del Centro Histórico"
+        "Transporte ida y regreso dentro de Cartagena"
     )
     items = [
         f"Servicio de hasta <b>{cantidad} gelatos</b> artesanales (vasos de 4 oz)",
@@ -246,12 +247,12 @@ def generar_pdf(nombre: str, tipo: str, fecha: str, cantidad: int, es_rural: boo
     for item in items:
         story.append(Paragraph(f"• {item}", s_item))
 
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 6))
 
     # ── Línea dorada + Precio ──────────────────────────────────────────────────
-    story.append(HRFlowable(width=ancho, thickness=0.6, color=GOLD, spaceAfter=8))
+    story.append(HRFlowable(width=ancho, thickness=0.6, color=GOLD, spaceAfter=6))
     story.append(Paragraph(f"Inversión total: {fmt_precio(precio)}", s_precio))
-    story.append(HRFlowable(width=ancho, thickness=0.6, color=GOLD, spaceAfter=10))
+    story.append(HRFlowable(width=ancho, thickness=0.6, color=GOLD, spaceAfter=7))
 
     # ── Requerimientos técnicos ────────────────────────────────────────────────
     story.append(Paragraph("Requerimientos técnicos", s_seccion))
@@ -260,31 +261,35 @@ def generar_pdf(nombre: str, tipo: str, fecha: str, cantidad: int, es_rural: boo
         "Espacio mínimo para instalación: 200 cm de alto, 160 cm de fondo y 80 cm de frente",
     ]:
         story.append(Paragraph(f"• {req}", s_item))
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 6))
 
     # ── Condiciones de reserva ─────────────────────────────────────────────────
     story.append(Paragraph("Condiciones de reserva", s_seccion))
-    for cond in [
-        "Para confirmar la fecha, requerimos el 50% de la inversión total como anticipo.",
-        "El 50% restante deberá cancelarse cinco (5) días antes del evento.",
+    condiciones = [
+        "Para confirmar la fecha, requerimos el 50% de la inversión total como anticipo. El 50% restante deberá cancelarse cinco (5) días antes del evento.",
         "La fecha quedará oficialmente reservada una vez recibido el anticipo.",
-        texto["nota_reserva"],
-    ]:
+        (
+            "Transferencias: <b>GIA Cartagena SAS</b> · NIT 901.961.461-3 · "
+            "Bancolombia Cuenta de Ahorros N.° 787-00009-886"
+        ),
+    ]
+    for cond in condiciones:
         story.append(Paragraph(f"• {cond}", s_item))
-    story.append(Spacer(1, 6))
+    story.append(Spacer(1, 4))
     story.append(Paragraph("Esta cotización tiene validez por 30 días.", s_validez))
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 7))
 
     # ── Cierre ─────────────────────────────────────────────────────────────────
     story.append(Paragraph(texto["cierre"], s_body))
-    story.append(Spacer(1, 14))
 
-    # ── Fotos en fila ──────────────────────────────────────────────────────────
+    # ── Fotografías + firma en página 2 ───────────────────────────────────────
+    story.append(PageBreak())
     story.append(Paragraph("Fotografías GIA", s_seccion))
+    story.append(Spacer(1, 6))
     fotos = [p for p in [FOTO1_PATH, FOTO2_PATH, FOTO3_PATH] if os.path.exists(p)]
     if fotos:
         ancho_foto = (ancho - 0.15*inch * (len(fotos)-1)) / len(fotos)
-        celdas = [[Image(f, width=ancho_foto, height=ancho_foto*1.25) for f in fotos]]
+        celdas = [[Image(f, width=ancho_foto, height=ancho_foto*1.3) for f in fotos]]
         tabla = Table(celdas, colWidths=[ancho_foto]*len(fotos), hAlign="CENTER")
         tabla.setStyle(TableStyle([
             ("ALIGN",        (0,0), (-1,-1), "CENTER"),
@@ -293,14 +298,14 @@ def generar_pdf(nombre: str, tipo: str, fecha: str, cantidad: int, es_rural: boo
             ("RIGHTPADDING", (0,0), (-1,-1), 3),
         ]))
         story.append(tabla)
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 16))
 
     # ── Despedida y firma ──────────────────────────────────────────────────────
     story.append(HRFlowable(width=ancho, thickness=0.6, color=GOLD, spaceAfter=8))
     story.append(Paragraph(texto["despedida"], s_body))
-    story.append(Spacer(1, 6))
+    story.append(Spacer(1, 4))
     story.append(Paragraph("Cordialmente,", s_body))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 12))
     story.append(Paragraph("MELISSA GIL", s_firma))
     story.append(Paragraph("Co-fundadora & CEO", s_firma_sub))
     story.append(Paragraph("GIA Gelateria", s_firma_sub))
