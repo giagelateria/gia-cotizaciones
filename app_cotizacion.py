@@ -129,12 +129,12 @@ TEXTOS = {
 
 # ── Header/Footer en cada página ──────────────────────────────────────────────
 PAGE_W, PAGE_H = letter
-MARGIN_X      = 1.1 * inch
-LOGO_H        = 1.05 * inch
-LOGO_W        = 2.1  * inch
-BARRERA_H     = 0.48 * inch
-TOP_MARGIN    = LOGO_H + 0.55 * inch   # margen generoso para elegancia
-BOTTOM_MARGIN = BARRERA_H + 0.3 * inch
+MARGIN_X      = 0.6 * inch
+LOGO_H        = 0.95 * inch
+LOGO_W        = 2.0  * inch
+BARRERA_H     = 0.44 * inch
+TOP_MARGIN    = LOGO_H + 0.42 * inch
+BOTTOM_MARGIN = BARRERA_H + 0.22 * inch
 
 def _dibujar_pagina(c, doc):
     """Dibuja logo (header) y barrera (footer) en cada página."""
@@ -191,18 +191,18 @@ def generar_pdf(nombre: str, tipo: str, fecha: str, cantidad: int, es_rural: boo
         return ParagraphStyle(nombre_e, **base)
 
     s_titulo    = estilo("titulo",    fontName="Times-Bold",   fontSize=13,
-                         textColor=NAVY, alignment=TA_CENTER, spaceAfter=4, leading=18)
-    s_seccion   = estilo("seccion",   fontName="Times-Bold",   fontSize=10,
-                         textColor=NAVY, spaceAfter=4, leading=14)
-    s_body      = estilo("body",      alignment=TA_JUSTIFY,    leading=16, spaceAfter=6)
-    s_item      = estilo("item",      leftIndent=14,           leading=15, spaceAfter=3)
-    s_precio    = estilo("precio",    fontName="Times-Bold",   fontSize=11,
-                         textColor=NAVY, spaceAfter=6, leading=16)
-    s_firma     = estilo("firma",     fontName="Times-Bold",   fontSize=11,
-                         textColor=NAVY, leading=16)
-    s_firma_sub = estilo("firma_sub", fontSize=9, textColor=GRAY, leading=13)
-    s_validez   = estilo("validez",   fontSize=9, textColor=GRAY,
-                         alignment=TA_CENTER, leading=13)
+                         textColor=NAVY, alignment=TA_CENTER, spaceAfter=4, leading=20)
+    s_seccion   = estilo("seccion",   fontName="Times-Bold",   fontSize=12,
+                         textColor=NAVY, spaceAfter=4, leading=17)
+    s_body      = estilo("body",      fontSize=12, alignment=TA_JUSTIFY, leading=18, spaceAfter=6)
+    s_item      = estilo("item",      fontSize=12, leftIndent=14, leading=17, spaceAfter=3)
+    s_precio    = estilo("precio",    fontName="Times-Bold",   fontSize=12,
+                         textColor=NAVY, spaceAfter=6, leading=18)
+    s_firma     = estilo("firma",     fontName="Times-Bold",   fontSize=12,
+                         textColor=NAVY, leading=18)
+    s_firma_sub = estilo("firma_sub", fontSize=11, textColor=GRAY, leading=15)
+    s_validez   = estilo("validez",   fontSize=11, textColor=GRAY,
+                         alignment=TA_CENTER, leading=15)
 
     story = []
 
@@ -211,23 +211,23 @@ def generar_pdf(nombre: str, tipo: str, fecha: str, cantidad: int, es_rural: boo
         f"PROPUESTA GIA GELATERIA: {texto['titulo_tipo']} — {fecha.upper()}",
         s_titulo
     ))
-    story.append(Spacer(1, 6))
+    story.append(Spacer(1, 4))
 
     # ── Saludo ─────────────────────────────────────────────────────────────────
     story.append(Paragraph(f"Estimado/a <b>{nombre}</b>,", s_body))
-    story.append(Spacer(1, 3))
+    story.append(Spacer(1, 2))
     story.append(Paragraph(
         "Gracias por pensar en GIA Gelateria para acompañarlos en un día tan especial.",
         s_body
     ))
-    story.append(Spacer(1, 3))
+    story.append(Spacer(1, 2))
     story.append(Paragraph(texto["intro"], s_body))
-    story.append(Spacer(1, 7))
+    story.append(Spacer(1, 5))
 
     # ── Sección propuesta ──────────────────────────────────────────────────────
     story.append(Paragraph(texto["subtitulo"], s_seccion))
     story.append(Paragraph(texto["descripcion"], s_body))
-    story.append(Spacer(1, 4))
+    story.append(Spacer(1, 3))
 
     # ── Incluye ────────────────────────────────────────────────────────────────
     story.append(Paragraph("Incluye:", s_seccion))
@@ -247,12 +247,12 @@ def generar_pdf(nombre: str, tipo: str, fecha: str, cantidad: int, es_rural: boo
     for item in items:
         story.append(Paragraph(f"• {item}", s_item))
 
-    story.append(Spacer(1, 6))
+    story.append(Spacer(1, 5))
 
     # ── Línea dorada + Precio ──────────────────────────────────────────────────
-    story.append(HRFlowable(width=ancho, thickness=0.6, color=GOLD, spaceAfter=6))
+    story.append(HRFlowable(width=ancho, thickness=0.6, color=GOLD, spaceAfter=5))
     story.append(Paragraph(f"Inversión total: {fmt_precio(precio)}", s_precio))
-    story.append(HRFlowable(width=ancho, thickness=0.6, color=GOLD, spaceAfter=7))
+    story.append(HRFlowable(width=ancho, thickness=0.6, color=GOLD, spaceAfter=5))
 
     # ── Requerimientos técnicos ────────────────────────────────────────────────
     story.append(Paragraph("Requerimientos técnicos", s_seccion))
@@ -261,7 +261,7 @@ def generar_pdf(nombre: str, tipo: str, fecha: str, cantidad: int, es_rural: boo
         "Espacio mínimo para instalación: 200 cm de alto, 160 cm de fondo y 80 cm de frente",
     ]:
         story.append(Paragraph(f"• {req}", s_item))
-    story.append(Spacer(1, 6))
+    story.append(Spacer(1, 5))
 
     # ── Condiciones de reserva ─────────────────────────────────────────────────
     story.append(Paragraph("Condiciones de reserva", s_seccion))
@@ -275,9 +275,9 @@ def generar_pdf(nombre: str, tipo: str, fecha: str, cantidad: int, es_rural: boo
     ]
     for cond in condiciones:
         story.append(Paragraph(f"• {cond}", s_item))
-    story.append(Spacer(1, 4))
+    story.append(Spacer(1, 3))
     story.append(Paragraph("Esta cotización tiene validez por 30 días.", s_validez))
-    story.append(Spacer(1, 7))
+    story.append(Spacer(1, 5))
 
     # ── Cierre ─────────────────────────────────────────────────────────────────
     story.append(Paragraph(texto["cierre"], s_body))
